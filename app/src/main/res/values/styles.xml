@@ -1,0 +1,13 @@
+<resources>
+
+    <style name="Widget.CallForwardingStatus.AppWidget.Container" parent="android:Widget">
+        <item name="android:clipToOutline">true</item>
+    </style>
+    <style name="Theme.CallForwardingStatus.AppWidgetContainerParent" parent="@android:style/Theme.DeviceDefault">
+        <item name="appWidgetRadius">8dp</item>
+        <item name="appWidgetPadding">4dp</item>
+        <item name="appWidgetInnerRadius">4dp</item>
+    </style>
+
+    <style name="Theme.CallForwardingStatus.AppWidgetContainer" parent="Theme.CallForwardingStatus.AppWidgetContainerParent" />
+</resources>
