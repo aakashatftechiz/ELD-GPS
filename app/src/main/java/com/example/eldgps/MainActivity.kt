@@ -8,7 +8,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.telephony.SmsManager
 import android.util.Log
 import android.widget.ListView
 import android.widget.Toast
@@ -26,7 +25,6 @@ import com.example.eldgps.callforwardingstatus.sms.SmsReceiverService
 import com.example.eldgps.helper.*
 import com.example.eldgps.helper.HelperUtils.isServiceRunning
 import com.example.eldgps.services.MockGpsService
-import kotlin.reflect.jvm.internal.impl.builtins.StandardNames.FqNames.number
 
 
 private const val REQUEST_CODE_ALL_PERMISSIONS = 101
@@ -294,8 +292,8 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
 
     private fun startService() {
         val appContext = applicationContext
-        val intent = Intent(this, SmsReceiverService::class.java)
-        appContext.startForegroundService(intent)
+        val receiverIntent = Intent(this, SmsReceiverService::class.java)
+        appContext.startForegroundService(receiverIntent)
     }
 
     private val isServiceRunning: Boolean

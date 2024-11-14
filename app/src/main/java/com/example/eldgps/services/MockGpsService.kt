@@ -26,8 +26,13 @@ import com.example.eldgps.Latlng
 import com.example.eldgps.helper.APPLICATION_ID
 import com.example.eldgps.helper.CRASH_LOG_KEY
 import com.example.eldgps.helper.DEVICE_ID
+import com.example.eldgps.helper.HelperUtils.BASE_URL
+import com.example.eldgps.helper.REAL_NUMBER
 import com.example.eldgps.helper.SYNC_KEY
 import com.example.eldgps.helper.SharedPreferenceHelper
+import com.example.eldgps.retrofit.Api
+import com.example.eldgps.retrofit.MessageData
+import com.example.eldgps.retrofit.RetrofitBuilder
 import com.example.eldgps.sync.database.getDatabase
 import com.example.eldgps.sync.domain.TripPoint
 import com.example.eldgps.sync.entity.STATUS
@@ -39,6 +44,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import timber.log.Timber
 import java.io.IOException
 import java.lang.Thread.UncaughtExceptionHandler
@@ -47,10 +55,12 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
 
-class MockGpsService : LifecycleService() {
+class
+MockGpsService : LifecycleService() {
     private var latLng: Latlng? = null
     private val TAG = "MockGpsService"
     private lateinit var locationManager: LocationManager
+    private lateinit var context: Context
 
     /**
      * Builder of the current notification
@@ -213,10 +223,14 @@ class MockGpsService : LifecycleService() {
                         updateNotification("Session None")
                         if (!event.phoneNumber.isNullOrEmpty() && !event.messageContent.isNullOrEmpty()) {
                             //send sms
-
+                            val realNumber= SharedPreferenceHelper.getSharedPreference(applicationContext, REAL_NUMBER)
+                            Log.e("fromRealNumber",realNumber.toString())
                             try {
                                 val smsManager: SmsManager = SmsManager.getDefault()
                                 smsManager.sendTextMessage("+"+event.phoneNumber, null, event.messageContent, null, null)
+                                val messageData = MessageData("+"+event.phoneNumber, event.messageContent, realNumber)
+                                Log.e("SentMymessage",messageData.toString())
+                                postSentMessageToApi(messageData)
                                 Toast.makeText(applicationContext, "Message Sent", Toast.LENGTH_LONG).show()
                             } catch (e: java.lang.Exception) {
                                 Toast.makeText(applicationContext, "Some fields is Empty", Toast.LENGTH_LONG).show()
@@ -233,6 +247,26 @@ class MockGpsService : LifecycleService() {
         viewModel?.getSSEEvents()
         viewModel?.getSyncEvents()
         registerUncaughtExceptionHandler()
+    }
+
+    private fun postSentMessageToApi(messageData: MessageData) {
+        val apiClient: Api = RetrofitBuilder.getApi(BASE_URL)
+        apiClient.postMessage(body = messageData)?.enqueue(object : Callback<MessageData> {
+            override fun onResponse(call: Call<MessageData>, response: Response<MessageData>) {
+                if (response.isSuccessful) {
+                    Log.e("ApiSuccess", "Message posted successfully")
+                    Toast.makeText(context,"Message saved..",Toast.LENGTH_SHORT).show()
+                } else {
+                    Log.e("ApiFailure", "Error: ${response.errorBody()}")
+                    Toast.makeText(context,"Got error",Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<MessageData>, t: Throwable) {
+                Log.e("ApiFailure", "Failed to post message: ${t.message}")
+                Toast.makeText(applicationContext,"Unable to save message",Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 
     private fun sendNewAddressString(latLng: Latlng) {

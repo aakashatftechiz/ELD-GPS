@@ -1,6 +1,7 @@
 package com.example.eldgps.retrofit
 
 
+import com.google.gson.GsonBuilder
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -30,11 +31,14 @@ object RetrofitBuilder {
     // Function to create or return the existing Retrofit instance
     private fun getRetrofitInstance(url: String): Retrofit {
         if (retrofitInstance == null) {
+            val gson = GsonBuilder()
+                .setLenient()
+                .create()
             // Create a new Retrofit instance
             retrofitInstance = Retrofit.Builder()
                 .baseUrl(url)
                 .client(client)
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(gson))
                 .build()
         }
         return retrofitInstance!!

@@ -10,9 +10,14 @@ data class MessageData(
 
     @SerializedName("message")
     @Expose
-    val message: String? = null
+    val message: String? = null,
+
+    @SerializedName("telephone")
+    @Expose
+    val from: String? = null
+
 ) {
     override fun toString(): String {
-        return "MessageData(realTelephone=$realTelephone, message=$message)"
+        return "MessageData(realTelephone=$realTelephone, message=$message,telephone=$from)"
     }
 }

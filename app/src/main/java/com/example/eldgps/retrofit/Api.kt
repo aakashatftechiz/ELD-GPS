@@ -11,5 +11,8 @@ interface Api {
      fun postData(@Header("Content-Type") contentType: String = "application/json", @Body body: EmulatorData) : Call<EmulatorData?>?
 
      @POST("saveMessage")
-     fun postMessage(@Header("Content-Type") contentType: String = "application/json",@Body body: MessageData) : Call<MessageData>?
+    fun postMessage(@Header("Content-Type") contentType: String = "application/json",@Body body: MessageData) : Call<MessageData>?
+
+    @POST("saveMessageOutbound")
+    fun postSentMessage(@Header("Content-Type") contentType: String = "application/json",@Body body: MessageData) : Call<MessageData>?
 }

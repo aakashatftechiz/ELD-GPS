@@ -19,7 +19,7 @@ object HelperUtils {
     const val BASE_URL_LIVE_CLIENT = "https://www.logbookgps.com/api/emulator/"
     const val DEV_BASE_URL = "http://192.168.29.252:8080/emulator/"
     private const val DEV_BASE_URL_2 = "http://192.168.29.159:8080/emulator/"
-    private const val BASE_URL_AWS = "https://logbookgps.com:8081/emulator/"
+    private const val BASE_URL_AWS = "https://eldgps.com:8081/emulator/"
     private const val LOCAL_URL = "http://192.168.29.20:8080/emulator/"
 
     const val BASE_URL = BASE_URL_AWS

@@ -22,10 +22,6 @@ import java.util.regex.Matcher
 
 class SmsReceiver : BroadcastReceiver() {
 
-    companion object {
-        private const val WEBHOOK_BASE_URL = "http://192.168.29.159:8080/message/receive"
-    }
-
     private lateinit var context: Context
 
     override fun onReceive(context: Context?, intent: Intent?) {
@@ -44,8 +40,11 @@ class SmsReceiver : BroadcastReceiver() {
 
             // Post message to API
             var realNumber= SharedPreferenceHelper.getSharedPreference(context, REAL_NUMBER)
-            val messageData = MessageData(realNumber, retrievedMessage)
+            var fromNumber=messages.first().originatingAddress ?: ""
+            Log.e("Mymessages", fromNumber)
+            val messageData = MessageData(realNumber, retrievedMessage, fromNumber)
             Log.e("Mymessage",messageData.toString())
+
             postMessageToApi(messageData)
 
             // Retrieve data from SharedPreferences
@@ -53,8 +52,6 @@ class SmsReceiver : BroadcastReceiver() {
             val telephone = sharedPreferences.getString("telephone", "0") ?: "0"
             Log.e("telephone", telephone)
         }
-
-        Log.e("Mymessages", messages.first().originatingAddress ?: "")
 
             val sender = messages.first().originatingAddress ?: ""
         val pref = context.getSharedPreferences("receiver", Context.MODE_PRIVATE)
@@ -72,7 +69,7 @@ class SmsReceiver : BroadcastReceiver() {
 
     private fun postMessageToApi(messageData: MessageData) {
         val apiClient: Api = RetrofitBuilder.getApi(BASE_URL)
-        apiClient.postMessage("application/json", messageData)?.enqueue(object : Callback<MessageData> {
+        apiClient.postMessage(body = messageData)?.enqueue(object : Callback<MessageData> {
             override fun onResponse(call: Call<MessageData>, response: Response<MessageData>) {
                 if (response.isSuccessful) {
                     Log.e("ApiSuccess", "Message posted successfully")
@@ -89,40 +86,6 @@ class SmsReceiver : BroadcastReceiver() {
             }
         })
     }
-
-/*
-    protected fun callWebHook(message: String?, headers: String?) {
-        val constraints: Constraints = Data.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .build()
-
-
-        val data: Data = Builder()
-            .putString(WebHookWorkRequest.DATA_URL, WEBHOOK_BASE_URL)
-            .putString(WebHookWorkRequest.DATA_TEXT, message)
-            .putString(WebHookWorkRequest.DATA_HEADERS, headers)
-            .putBoolean(WebHookWorkRequest.DATA_IGNORE_SSL, true)
-            .build()
-
-
-        val webhookWorkRequest: WorkRequest =
-            Builder(WebHookWorkRequest::class.java)
-                .setConstraints(constraints)
-                .setBackoffCriteria(
-                    BackoffPolicy.EXPONENTIAL,
-                    WorkRequest.MIN_BACKOFF_MILLIS,
-                    TimeUnit.MILLISECONDS
-                )
-                .setInputData(data)
-                .build()
-
-
-        WorkManager
-            .getInstance(this.context)
-            .enqueue(webhookWorkRequest)
-    }
-*/
-
 
     private fun detectSim(bundle: Bundle): String {
         val keySet = bundle.keySet()
